@@ -3,6 +3,8 @@ package ru.algoviz_lms.algo_impls.vector.steps;
 import ru.algoviz_lms.algo_impls.common.Step;
 import ru.algoviz_lms.algo_impls.common.VizStep;
 
-@VizStep(value = "swapStep")
-public record SwapStep(int i, int j) implements Step {
+import java.util.List;
+
+@VizStep(value = "swap")
+public record SwapStep(List<Integer> indices) implements Step {
 }

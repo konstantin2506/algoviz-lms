@@ -5,10 +5,10 @@ import java.util.List;
 
 public class BasicVisualizer implements Visualizer{
     private final List<Step> stepStorage = new ArrayList<>();
-    private final JsonMapper mapper;
+    private final Step initialState;
 
-    public BasicVisualizer(JsonMapper mapper){
-        this.mapper = mapper;
+    public BasicVisualizer(Step initialState){
+        this.initialState = initialState;
     }
 
     @Override
@@ -17,15 +17,14 @@ public class BasicVisualizer implements Visualizer{
     }
 
     @Override
-    public String getSteps() {
-        var fs = new FatherStep(stepStorage);
-        return fs.asString(mapper);
+    public StepsDto getSteps() {
+        return new StepsDto(initialState, stepStorage);
     }
+
 
     protected void addStep(Step step){
         stepStorage.add(step);
     }
-
     protected void error(String reason){
         stepStorage.add(new ErrorStep(reason));
         throw new ErrorInStepException(reason);

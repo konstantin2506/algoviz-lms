@@ -1,5 +1,5 @@
 package ru.algoviz_lms.algo_impls.common;
 
-@VizStep("errorStep")
+@VizStep("error")
 public record ErrorStep(String reason) implements Step {
 }

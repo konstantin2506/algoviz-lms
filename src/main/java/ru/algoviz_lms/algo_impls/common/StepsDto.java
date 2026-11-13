@@ -1,4 +1,6 @@
 package ru.algoviz_lms.algo_impls.common;
 
-public record StepsDto() {
+import java.util.List;
+
+public record StepsDto(Step dataStructure, List<Step> steps) {
 }
