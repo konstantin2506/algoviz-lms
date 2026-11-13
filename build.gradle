@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'ru.algoviz_lms'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = '21'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+
+
+    // JUnit 5 для тестов
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+application {
+    // Укажи здесь свой главный класс с методом main()
+    mainClass = 'ru.algoviz_lms.Main'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
