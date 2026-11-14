@@ -1,10 +1,20 @@
-package ru.algoviz_lms.algo_impls.vector;
+package ru.algoviz_lms.algo_impls.vector.algorithms;
+
+import org.springframework.stereotype.Component;
+import ru.algoviz_lms.algo_impls.vector.VectorAlgorithm;
+import ru.algoviz_lms.algo_impls.vector.VectorVisualizer;
 
 import java.util.List;
 
-public class BubbleSort {
+@Component
+public class BubbleSort implements VectorAlgorithm {
 
-    public static void sort(VectorVisualizer viz) {
+    @Override
+    public String getName() {
+        return "bubbleSort";
+    }
+
+    public void execute(VectorVisualizer viz) {
         int n = viz.size();
         if (n <= 1) {
             viz.log("Массив пуст или содержит один элемент — сортировать нечего");

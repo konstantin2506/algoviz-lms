@@ -5,11 +5,8 @@ import java.util.List;
 
 public class BasicVisualizer implements Visualizer{
     private final List<Step> stepStorage = new ArrayList<>();
-    private final Step initialState;
 
-    public BasicVisualizer(Step initialState){
-        this.initialState = initialState;
-    }
+    public BasicVisualizer(){}
 
     @Override
     public void log(String info) {
@@ -17,8 +14,8 @@ public class BasicVisualizer implements Visualizer{
     }
 
     @Override
-    public StepsDto getSteps() {
-        return new StepsDto(initialState, stepStorage);
+    public List<Step> getSteps() {
+        return stepStorage;
     }
 
 

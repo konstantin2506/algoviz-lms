@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>AlgoViz — Vector Visualizer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f1419;
+            color: #e6e6e6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .app { width: 100%; max-width: 1000px; }
+        h1 { font-size: 20px; font-weight: 600; margin: 0 0 20px; color: #fff; }
+        h1 span { color: #4ade80; }
+
+        .controls { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+        .controls input {
+            flex: 1; min-width: 200px;
+            padding: 10px 14px;
+            background: #1a1f2e;
+            border: 1px solid #2a3142;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: "SF Mono", Menlo, monospace;
+        }
+        .controls input:focus { outline: none; border-color: #4ade80; }
+        .controls select {
+            padding: 10px 14px;
+            background: #1a1f2e;
+            border: 1px solid #2a3142;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        .controls select:focus { outline: none; border-color: #4ade80; }
+        .controls button {
+            padding: 10px 20px;
+            background: #4ade80;
+            color: #0f1419;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .controls button:hover { background: #22c55e; }
+        .controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .array-view {
+            display: flex; gap: 8px; justify-content: center;
+            min-height: 120px; padding: 24px;
+            background: #1a1f2e; border-radius: 12px;
+            margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+        }
+        .cell {
+            width: 64px; height: 88px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: #252b3d;
+            border: 2px solid #2a3142;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        .cell .value {
+            font-size: 22px; font-weight: 700; color: #fff;
+            font-family: "SF Mono", Menlo, monospace;
+        }
+        .cell .index {
+            font-size: 11px; color: #6b7280; margin-top: 4px;
+        }
+
+        /* жёлтый — идёт сравнение */
+        .cell.highlight {
+            border-color: #fbbf24;
+            background: #3d3410;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
+        }
+        .cell.highlight .value { color: #fbbf24; }
+
+        /* пурпурный — только что записали значение */
+        .cell.assigned {
+            border-color: #a855f7;
+            background: #2d1740;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+        }
+        .cell.assigned .value { color: #c084fc; }
+
+        /* розовый — откуда "уехало" значение (при fromIndex) */
+        .cell.moving-from {
+            border-color: #ec4899;
+            background: #4c1d2e;
+        }
+        .cell.moving-from .value { color: #f9a8d4; }
+
+        /* синий пунктир — сливаемый диапазон (range) */
+        .cell.in-range {
+            outline: 2px dashed #6366f1;
+            outline-offset: 3px;
+        }
+
+        /* зелёный — финальная позиция */
+        .cell.sorted {
+            border-color: #4ade80;
+            background: #14361f;
+        }
+        .cell.sorted .value { color: #4ade80; }
+
+        .player-bar {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            background: #1a1f2e; border-radius: 12px;
+            margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .player-bar button {
+            width: 36px; height: 36px;
+            background: #252b3d; color: #e6e6e6;
+            border: 1px solid #2a3142;
+            border-radius: 8px;
+            font-size: 14px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .player-bar button:hover:not(:disabled) {
+            background: #2f3648; border-color: #4ade80;
+        }
+        .player-bar button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .player-bar input[type="range"] {
+            flex: 1; min-width: 150px; accent-color: #4ade80;
+        }
+        .player-bar .counter {
+            font-family: "SF Mono", Menlo, monospace;
+            font-size: 13px; color: #9ca3af;
+            min-width: 80px; text-align: right;
+        }
+        .player-bar select {
+            padding: 6px 10px;
+            background: #252b3d; color: #e6e6e6;
+            border: 1px solid #2a3142;
+            border-radius: 6px;
+            font-size: 12px; cursor: pointer;
+        }
+
+        .log-view {
+            padding: 16px;
+            background: #1a1f2e; border-radius: 12px;
+            min-height: 52px;
+            font-size: 14px; color: #9ca3af;
+            font-family: "SF Mono", Menlo, monospace;
+        }
+        .log-view::before { content: "▶ "; color: #4ade80; }
+
+        .error {
+            padding: 16px;
+            background: #3d1010; border: 1px solid #7f1d1d;
+            border-radius: 12px; color: #fca5a5;
+            margin-bottom: 16px; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1><span>●</span> AlgoViz — Vector Visualizer</h1>
+
+    <div class="controls">
+        <select id="algorithmSelect" title="Алгоритм"></select>
+        <input id="arrayInput" value="5,2,9,1,8,3,6" placeholder="5,2,9,1,8,3,6">
+        <button id="runBtn" onclick="visualize()">Visualize</button>
+    </div>
+
+    <div id="errorBox"></div>
+    <div id="arrayView" class="array-view"></div>
+
+    <div class="player-bar">
+        <button onclick="goTo(0)"        title="В начало">⏮</button>
+        <button onclick="prev()"          title="Шаг назад">◀</button>
+        <button id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+        <button onclick="next()"          title="Шаг вперёд">▶</button>
+        <button onclick="goToLast()"      title="В конец">⏭</button>
+        <input type="range" id="slider" min="0" value="0" oninput="goTo(+this.value)">
+        <span id="stepCounter" class="counter">0 / 0</span>
+        <select id="speed" onchange="updateSpeed()">
+            <option value="1000">0.5x</option>
+            <option value="500" selected>1x</option>
+            <option value="250">2x</option>
+            <option value="100">5x</option>
+        </select>
+    </div>
+
+    <div id="logView" class="log-view"></div>
+</div>
+
+<script>
+    const API_BASE = '/api/visualize/vector';
+
+    let states = [];
+    let currentIndex = 0;
+    let playInterval = null;
+    let playSpeed = 500;
+
+    // ---------- РЕНДЕР ----------
+    function render() {
+        const state = states[currentIndex];
+        if (!state) return;
+
+        const view = document.getElementById('arrayView');
+        view.innerHTML = '';
+
+        state.array.forEach((val, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+
+            // приоритет: sorted > assigned > moving-from > highlight
+            if (state.sorted.has(i)) {
+                cell.classList.add('sorted');
+            } else if (i === state.lastAssigned) {
+                cell.classList.add('assigned');
+            } else if (i === state.movingFrom) {
+                cell.classList.add('moving-from');
+            } else if (state.highlight.has(i)) {
+                cell.classList.add('highlight');
+            }
+
+            // пунктирная рамка для сливаемого диапазона
+            if (state.range && i >= state.range.from && i <= state.range.to && !state.sorted.has(i)) {
+                cell.classList.add('in-range');
+            }
+
+            cell.innerHTML = `
+        <div class="value">${val}</div>
+        <div class="index">${i}</div>
+      `;
+            view.appendChild(cell);
+        });
+
+        document.getElementById('logView').textContent = state.log || '—';
+
+        const slider = document.getElementById('slider');
+        slider.max = states.length - 1;
+        slider.value = currentIndex;
+
+        document.getElementById('stepCounter').textContent =
+            `${currentIndex} / ${states.length - 1}`;
+    }
+
+    // ---------- ПОСТРОЕНИЕ СНАПШОТОВ ----------
+    function buildStates(initialArray, steps) {
+        const result = [];
+
+        const array     = [...initialArray];
+        const highlight = new Set();
+        const sorted    = new Set();
+        let   log       = '';
+        let   lastAssigned = -1;
+        let   movingFrom   = -1;
+        let   currentRange = null;
+
+        // нулевой снапшот
+        result.push({
+            array: [...array],
+            highlight: new Set(highlight),
+            sorted:    new Set(sorted),
+            lastAssigned,
+            movingFrom,
+            range: currentRange,
+            log,
+        });
+
+        for (const step of steps) {
+            // сбрасываем "одноразовые" визуалы на каждом шаге
+            let stepLastAssigned = -1;
+            let stepMovingFrom   = -1;
+
+            switch (step.name) {
+                case 'swap': {
+                    const [i, j] = step.indices;
+                    [array[i], array[j]] = [array[j], array[i]];
+                    break;
+                }
+
+                case 'assign': {
+                    array[step.index] = step.value;
+                    stepLastAssigned = step.index;
+                    if (step.fromIndex !== undefined && step.fromIndex !== null) {
+                        stepMovingFrom = step.fromIndex;
+                    }
+                    break;
+                }
+
+                case 'highlight':
+                    step.indices.forEach(i => highlight.add(i));
+                    break;
+
+                case 'unhighlight':
+                    step.indices.forEach(i => highlight.delete(i));
+                    break;
+
+                case 'setSorted':
+                    step.indices.forEach(i => sorted.add(i));
+                    break;
+
+                case 'compare':
+                    // визуально ничего не меняем
+                    break;
+
+                case 'range': {
+                    if (step.role === 'clear' || step.from < 0) {
+                        currentRange = null;
+                    } else {
+                        currentRange = { from: step.from, to: step.to, role: step.role };
+                    }
+                    break;
+                }
+
+                case 'log':
+                    log = step.info;
+                    break;
+            }
+
+            lastAssigned = stepLastAssigned;
+            movingFrom   = stepMovingFrom;
+
+            result.push({
+                array:     [...array],
+                highlight: new Set(highlight),
+                sorted:    new Set(sorted),
+                lastAssigned,
+                movingFrom,
+                range:     currentRange ? { ...currentRange } : null,
+                log,
+            });
+        }
+
+        return result;
+    }
+
+    // ---------- API ----------
+    async function loadAlgorithms() {
+        try {
+            const res = await fetch(`${API_BASE}/algorithms`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const algorithms = await res.json();
+
+            const select = document.getElementById('algorithmSelect');
+            select.innerHTML = '';
+            algorithms.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+        } catch (e) {
+            showError('Не удалось загрузить список алгоритмов: ' + e.message);
+        }
+    }
+
+    async function visualize() {
+        const raw = document.getElementById('arrayInput').value;
+        const data = raw.split(',').map(s => parseInt(s.trim())).filter(Number.isFinite);
+        const algorithm = document.getElementById('algorithmSelect').value;
+
+        if (data.length === 0) { showError('Введите хотя бы одно число'); return; }
+        if (!algorithm)        { showError('Выберите алгоритм'); return; }
+
+        document.getElementById('runBtn').disabled = true;
+        document.getElementById('errorBox').innerHTML = '';
+        stopPlay();
+
+        try {
+            const res = await fetch(`${API_BASE}/${algorithm}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data }),
+            });
+
+            if (!res.ok) {
+                let msg = `HTTP ${res.status}`;
+                try {
+                    const errJson = await res.json();
+                    if (errJson.error) msg = errJson.error;
+                } catch (_) {}
+                throw new Error(msg);
+            }
+
+            const json = await res.json();
+            if (!json.dataStructure || !json.dataStructure.initialState) {
+                throw new Error('Ответ бэкенда без initialState');
+            }
+
+            states = buildStates(json.dataStructure.initialState, json.steps);
+            goTo(0);
+        } catch (e) {
+            showError('Ошибка: ' + e.message);
+            states = [];
+            render();
+        } finally {
+            document.getElementById('runBtn').disabled = false;
+        }
+    }
+
+    function showError(msg) {
+        document.getElementById('errorBox').innerHTML =
+            `<div class="error">${msg}</div>`;
+    }
+
+    // ---------- ПЛЕЕР ----------
+    function goTo(idx) {
+        if (!states.length) return;
+        currentIndex = Math.max(0, Math.min(idx, states.length - 1));
+        render();
+    }
+    function next()     { goTo(currentIndex + 1); }
+    function prev()     { goTo(currentIndex - 1); }
+    function goToLast() { goTo(states.length - 1); }
+
+    function togglePlay() {
+        if (playInterval) { stopPlay(); return; }
+        if (currentIndex >= states.length - 1) goTo(0);
+        document.getElementById('playBtn').textContent = '⏸';
+        playInterval = setInterval(() => {
+            if (currentIndex >= states.length - 1) { stopPlay(); return; }
+            next();
+        }, playSpeed);
+    }
+
+    function stopPlay() {
+        if (playInterval) { clearInterval(playInterval); playInterval = null; }
+        document.getElementById('playBtn').textContent = '▶';
+    }
+
+    function updateSpeed() {
+        playSpeed = +document.getElementById('speed').value;
+        if (playInterval) { stopPlay(); togglePlay(); }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (e.code === 'ArrowLeft')  prev();
+        if (e.code === 'ArrowRight') next();
+        if (e.code === 'Space')      { e.preventDefault(); togglePlay(); }
+    });
+
+    // ---------- СТАРТ ----------
+    window.addEventListener('load', async () => {
+        await loadAlgorithms();
+        visualize();
+    });
+</script>
+</body>
+</html>
