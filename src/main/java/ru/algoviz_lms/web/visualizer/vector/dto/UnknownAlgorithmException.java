@@ -1,4 +1,4 @@
-package ru.algoviz_lms.web.visualizer.dto;
+package ru.algoviz_lms.web.visualizer.vector.dto;
 
 import lombok.Getter;
 

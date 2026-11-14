@@ -1,14 +1,11 @@
-package ru.algoviz_lms.web.visualizer.controller;
+package ru.algoviz_lms.web.visualizer.vector.controller;
 
-import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.algoviz_lms.algo_impls.vector.*;
-import ru.algoviz_lms.algo_impls.vector.algorithms.BubbleSort;
-import ru.algoviz_lms.web.visualizer.dto.VecVisDto;
-import ru.algoviz_lms.web.visualizer.dto.VectorDataDto;
-import ru.algoviz_lms.web.visualizer.dto.VectorVisRequest;
-import ru.algoviz_lms.web.visualizer.dto.VectorVisResponse;
-import ru.algoviz_lms.web.visualizer.service.VectorVisService;
+import ru.algoviz_lms.web.visualizer.vector.dto.VecVisDto;
+import ru.algoviz_lms.web.visualizer.vector.dto.VectorDataDto;
+import ru.algoviz_lms.web.visualizer.vector.dto.VectorVisRequest;
+import ru.algoviz_lms.web.visualizer.vector.dto.VectorVisResponse;
+import ru.algoviz_lms.web.visualizer.vector.service.VectorVisService;
 
 import java.util.Set;
 

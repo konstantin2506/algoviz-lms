@@ -1,10 +1,13 @@
-package ru.algoviz_lms.web.visualizer.service;
+package ru.algoviz_lms.web.visualizer.vector.service;
 
 import org.springframework.stereotype.Service;
 import ru.algoviz_lms.algo_impls.vector.BasicVectorVisualizer;
 import ru.algoviz_lms.web.visualizer.dto.*;
 import ru.algoviz_lms.algo_impls.vector.VectorAlgorithm;
 import ru.algoviz_lms.algo_impls.vector.VectorVisualizer;
+import ru.algoviz_lms.web.visualizer.vector.dto.UnknownAlgorithmException;
+import ru.algoviz_lms.web.visualizer.vector.dto.VecVisDto;
+import ru.algoviz_lms.web.visualizer.vector.dto.VectorVisSteps;
 
 import java.util.List;
 import java.util.Map;
