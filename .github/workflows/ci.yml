@@ -94,11 +94,11 @@ jobs:
       - name: Smoke - algorithms list
         run: |
           curl -f http://localhost:8080/api/visualize/vector/algorithms
-          curl -s http://localhost:8080/api/visualize/vector/algorithms | grep -q "bubble-sort"
+          curl -s http://localhost:8080/api/visualize/vector/algorithms | grep -q "bubbleSort"
 
       - name: Smoke - bubble sort works
         run: |
-          response=$(curl -s -X POST http://localhost:8080/api/visualize/vector/bubble-sort \
+          response=$(curl -s -X POST http://localhost:8080/api/visualize/vector/bubbleSort \
             -H "Content-Type: application/json" \
             -d '{"data":[5,2,9,1,8,3,6]}')
           echo "$response" | head -c 300
