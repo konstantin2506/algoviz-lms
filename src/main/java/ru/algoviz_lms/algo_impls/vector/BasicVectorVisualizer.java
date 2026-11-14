@@ -68,5 +68,7 @@ public class BasicVectorVisualizer extends BasicVisualizer implements VectorVisu
         addStep(new AssignStep(index, value, fromIndex));
         vec.set(index, value);
     }
-
+    public List<Integer> getVector(){
+        return List.copyOf(vec);
+    }
 }
